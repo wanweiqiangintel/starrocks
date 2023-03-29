@@ -82,4 +82,26 @@ TEST(BitPacking, UnpackValues) {
     }
 }
 
+TEST(BitPacking, UnpackValuesSIMD) {
+    uint8_t data[BitPacking::MAX_BITWIDTH * 48 / 8];
+    for (unsigned char& i : data) {
+        i = 0x8;
+    }
+
+    uint64_t result[48];
+    const uint8_t* pos = nullptr;
+    int64_t num = 0;
+    std::tie(pos, num) = BitPacking::UnpackValuesSIMD<uint64_t>(4, data, 4 * 48 / 8, 48, result);
+    ASSERT_EQ(pos, data + 4 * 48 / 8);
+    ASSERT_EQ(num, 48);
+
+    for (size_t i = 0; i < 48; i++) {
+        if (i % 2 == 0) {
+            ASSERT_EQ(result[i], 8);
+        } else {
+            ASSERT_EQ(result[i], 0);
+        }
+    }
+}
+
 } // namespace starrocks
